@@ -8,12 +8,12 @@ async function main() {
   // If this script is run directly using `node` you may want to call compile
   // manually to make sure everything is compiled
   // await hre.run('compile');
-  const addresses = [
-  ];
+  const addresses = [];
 
   const leafNodes = addresses.map((addr) => keccak256(addr));
   const merkleTree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
   const rootHash = merkleTree.getHexRoot();
+  
 
   console.log("Merkle Tree \n", merkleTree.toString());
   console.log("Root Hash\n\t", rootHash.toString());

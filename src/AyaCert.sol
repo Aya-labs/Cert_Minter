@@ -12,25 +12,55 @@ contract AyaCert is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
+    string public certURI;
     bytes32 public merkleRoot;
+    mapping(address => bool) public isAllowed;
     mapping(address => bool) public certClaimed;
-    string public uriPrefix = '';
-  string public uriSuffix = '.json';
-  string public hiddenMetadataUri;
   uint256 public immutable maxSupply;
 
-    constructor(bytes32 _merkleRoot, uint _maxSupply) ERC721("AyaCert", "AYCT") {
+    constructor(bytes32 _merkleRoot, uint _maxSupply, string memory _certURI) ERC721("AyaCert", "AYCT") {
         merkleRoot = _merkleRoot;
         maxSupply = _maxSupply;
-    }
 
-    function safeMint(address to, string memory uri) public onlyOwner {
+        certURI = _certURI;
+
+    }
+//  if ypou make use of normal whitelist
+    function certMint() external  {
+        require(isAllowed[msg.sender], "You are not allowed to mint");
+        require(certClaimed[msg.sender] == false, "You have already claimed your certificate");
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
+        certClaimed[msg.sender] = true;
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, certURI);
+    }
+    // use this to go the merkle route
+    function mintCert (bytes32[] calldata  merkleProof) public {
+        require(certClaimed[msg.sender] == false, "You have already claimed your certificate");
+        certClaimed[msg.sender] = true;
+        require(MerkleProof.verify(merkleProof, merkleRoot, keccak256(abi.encodePacked(msg.sender))), "You are not allowed to mint");
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(msg.sender, tokenId);
+
     }
 
+    function allowToMint(address _address) public onlyOwner {
+        isAllowed[_address] = true;
+    }
+    function allowToMint(address[] memory _address) public onlyOwner {
+        for (uint i = 0; i < _address.length; i++) {
+            isAllowed[_address[i]] = true;
+        }
+    }
+    function updateMerkleRoot(bytes32 _merkleRoot) public onlyOwner {
+        merkleRoot = _merkleRoot;
+    }
+
+    function updateCertURI(string memory _certURI) public onlyOwner {
+        certURI = _certURI;
+    }
     // The following functions are overrides required by Solidity.
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
