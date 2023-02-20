@@ -2,8 +2,6 @@
 src = 'src'
 out = 'out'
 libs = ['lib']
-
-via_ir = false
 verbosity= 5
 ffi=true
 optimizer = true
