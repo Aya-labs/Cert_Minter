@@ -6,8 +6,9 @@ import "../lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721En
 import "../lib/openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "../lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import "../lib/openzeppelin-contracts/contracts/utils/Counters.sol";
-
-contract AyaCert is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
+import "../lib/openzeppelin-contracts/contracts/metatx/ERC2771Context.sol";
+import "../lib/openzeppelin-contracts/contracts/metatx/MinimalForwarder.sol";
+contract AyaCertMeta is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
@@ -17,21 +18,23 @@ contract AyaCert is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
     mapping(address => bool) public certClaimed;
     uint256 public immutable maxSupply;
 
-    constructor(string memory _certURI, uint256 _maxSupply) ERC721("AyaCert", "AYCT") {
+    constructor(string memory _certURI, uint256 _maxSupply, MinimalForwarder forwarder) ERC721("AyaCert", "AYCT")  // Initialize trusted forwarder
+     {
         maxSupply = _maxSupply;
 
         certURI = _certURI;
+
     }
     //  if ypou make use of normal whitelist
 
     function certMint() external {
-        require(isAllowed[msg.sender], "You are not allowed to mint");
-        require(certClaimed[msg.sender] == false, "You have already claimed your certificate");
+        require(isAllowed[_msgSender()], "You are not allowed to mint");
+        require(certClaimed[_msgSender()] == false, "You have already claimed your certificate");
         require(_tokenIdCounter.current() < maxSupply, "Max supply reached");
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
-        certClaimed[msg.sender] = true;
-        _safeMint(msg.sender, tokenId);
+        certClaimed[_msgSender()] = true;
+        _safeMint(_msgSender(), tokenId);
         _setTokenURI(tokenId, certURI);
     }
 

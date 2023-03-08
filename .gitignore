@@ -14,3 +14,12 @@ node_modules
 .env
 out/
 lib/
+node_modules
+artifacts
+cache
+deploy.*.json
+tmp
+build
+.env
+relay.json
+autotask.json

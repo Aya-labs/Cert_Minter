@@ -12,18 +12,17 @@ contract AyaCertTest is Test {
     address minter4 = mkaddr("minter4");
     address receiver1 = mkaddr("receiver1");
     address own;
-    
 
     function setUp() public {
         ayacert = new AyaCert( "uri", 10);
         vm.label(address(this), "owner");
-        
     }
+
     function testMint() public {
         vm.prank(address(this));
         address[] memory minters = new address[](3);
         minters[0] = minter1;
-        minters[1] = minter2  ;
+        minters[1] = minter2;
         minters[2] = minter3;
         AyaCert(ayacert).allowToMints(minters);
         // ayacert.allowToMint(minters);
@@ -37,22 +36,19 @@ contract AyaCertTest is Test {
         ayacert.certMint();
         vm.prank(minter3);
         ayacert.certMint();
-
     }
+
     function testTfterb() public {
         vm.startPrank(minter1);
         ayacert.balanceOf(minter1);
         ayacert.transferFrom(minter1, receiver1, 0);
         vm.stopPrank();
         vm.startPrank(minter2);
-        ayacert.transferFrom(msg.sender, receiver1,0);
-
-
+        ayacert.transferFrom(msg.sender, receiver1, 0);
     }
+
     function mkaddr(string memory name) public returns (address) {
-        address addr = address(
-            uint160(uint256(keccak256(abi.encodePacked(name))))
-        );
+        address addr = address(uint160(uint256(keccak256(abi.encodePacked(name)))));
         vm.label(addr, name);
         return addr;
     }
