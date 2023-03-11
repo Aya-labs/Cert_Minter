@@ -8,7 +8,7 @@ function getInstance(name) {
 }
 
 async function main() {
-  const registry = await getInstance("Registry");
+  const registry = await getInstance("AyaCert");
   const events = await registry.queryFilter(registry.filters.Registered());
   console.log('Registrations')
   console.log('=============')
